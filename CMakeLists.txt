@@ -265,11 +265,23 @@ add_executable(LuaGame
 set_target_properties(LuaGame PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LuaGame"
 )
+
+# GLEW headers and library
+# We need to prevent glew from using '-framework AGL', which was removed 
+# in macOS Tahoe. The current fix is to 1) explicitly include glew headers,
+# and 2) link to the glew library file directly, rather than the glew target.
+# Should work equally well on all platforms.
+# https://developer.apple.com/documentation/macos-release-notes/macos-26-release-notes
+target_include_directories(LuaGame PRIVATE
+    ${glew_SOURCE_DIR}/include
+)
+
 target_link_libraries(
     LuaGame PRIVATE 
     ${SDL2_LIBRARIES} 
     SDL2_mixer::SDL2_mixer 
-    libglew_static 
+    # libglew_static 
+    $<TARGET_FILE:libglew_static> # link to library file directly to avoid AGL framework
     ${OPENGL_LIBRARIES} 
     ${LUA_LIBRARIES} 
     sol2::sol2
